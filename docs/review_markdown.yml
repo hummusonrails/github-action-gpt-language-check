@@ -13,57 +13,56 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Get the latest release URL
-      id: get_latest_release
-      uses: actions/github-script@v5
-      with:
-        script: |
-          const response = await github.rest.repos.getLatestRelease({
-            owner: 'bencgreenberg',
-            repo: 'github-action-gpt-language-check'
-          });
-          const asset = response.data.assets.find(asset => asset.name === 'github-action-gpt-language-check');
-          if (!asset) {
-            throw new Error('Binary not found in the latest release');
-          }
-          return { url: asset.browser_download_url };
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
     - name: Download pre-built Rust script from remote repository
       run: |
-        wget "${{ steps.get_latest_release.outputs.url }}" -O github-action-gpt-language-check
+        # Fetch the latest release information from the GitHub API
+        release_info=$(curl -s -H "Accept: application/vnd.github+json" https://api.github.com/repos/bencgreenberg/github-action-gpt-language-check/releases/latest)
+        
+        # Extract the binary's download URL using 'jq' 
+        binary_url=$(echo $release_info | jq -r '.assets[] | select(.name == "github-action-gpt-language-check") | .browser_download_url')
+
+        # Download the binary using 'wget'
+        wget "$binary_url" -O github-action-gpt-language-check
+
+        # Make the binary executable
         chmod +x github-action-gpt-language-check
+      shell: bash
 
     - name: Run Rust script for each markdown file
       env:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       run: |
         suggestions=""
-        for file in $(find . -type f -iname "*.md"); do
-          echo "Reviewing: $file"
-          suggestion=$(./github-action-gpt-language-check "$file")
-          if [[ ! -z "$suggestion" ]]; then
-            suggestions+="- $file: $suggestion\n"
-            echo "Suggestion found"
-            echo "SUGGESTION_FOUND=true" >> $GITHUB_ENV
+        pr_files=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github+json" https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/${{ github.event.number }}/files | jq -r '.[].filename')
+        for file in $pr_files; do
+          if [[ $file == *.md ]]; then
+            echo "Reviewing: $file"
+            suggestion=$(./github-action-gpt-language-check "$file")
+            if [[ ! -z "$suggestion" ]]; then
+              suggestions+="- $file: $suggestion\n"
+              echo "Suggestion found"
+              echo "SUGGESTION_FOUND=true" >> $GITHUB_ENV
+            fi
           fi
         done
-        echo "SUGGESTIONS=$suggestions" >> $GITHUB_ENV
-
-
+        # Use printf to set SUGGESTIONS environment variable
+        printf 'SUGGESTIONS<<EOF\n%s\nEOF' "$suggestions" >> $GITHUB_ENV
 
     - name: Add a comment to the pull request
       if: ${{ env.SUGGESTION_FOUND == 'true' }}
       uses: actions/github-script@v5
       with:
         script: |
-          const suggestions = `Suggested changes: ${process.env.SUGGESTIONS}`
+          const suggestionsList = process.env.SUGGESTIONS.split('\n').filter(suggestion => suggestion.trim() !== '');
+          let suggestionsMarkdown = '## Suggested Changes\n';
+          for (const suggestion of suggestionsList) {
+            const [file, ...suggestionText] = suggestion.split(':');
+            suggestionsMarkdown += `### Reviewed File: **${file.trim()}**\n\n`;
+            suggestionsMarkdown += `- ${suggestionText.join(':').trim()}\n\n`;
+          }
           github.rest.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: suggestions
+            body: suggestionsMarkdown
           });
-
