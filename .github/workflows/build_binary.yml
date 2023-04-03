@@ -1,0 +1,27 @@
+name: Build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+
+    - name: Build
+      run: cargo build --release
+
+    - name: Upload binary
+      uses: actions/upload-artifact@v2
+      with:
+        name: github-action-gpt-language-check
+        path: target/release/github-action-gpt-language-check
