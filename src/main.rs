@@ -61,7 +61,7 @@ async fn call_openai_api(api_key: &str, text: &str, base_url: &str) -> Result<St
 
     // Define the request body with the model parameter and prompt text
     let request_body = serde_json::json!({
-        "model": "gpt-3.5-turbo",
+        "model": "gpt-4",
         "messages": [{"role": "user", "content": prompt}],
         "max_tokens": 100
     });
