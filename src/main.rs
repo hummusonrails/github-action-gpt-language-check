@@ -76,6 +76,9 @@ async fn call_openai_api(api_key: &str, text: &str, base_url: &str) -> Result<St
     .json::<Value>()
     .await?;
 
+    // Debug print the request headers
+    println!("Request Headers: {:#?}", response.headers());
+
     // Extract the suggestion from the response
     let choices = response["choices"].as_array().ok_or(SuggestionError("Missing choices field".to_string()))?;
     let suggestion = choices
