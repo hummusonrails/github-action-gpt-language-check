@@ -1,0 +1,69 @@
+name: Review Markdown
+
+on:
+  pull_request:
+    paths:
+      - '**/*.md'
+
+jobs:
+  review_markdown:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Get the latest release URL
+      id: get_latest_release
+      uses: actions/github-script@v5
+      with:
+        script: |
+          const response = await github.rest.repos.getLatestRelease({
+            owner: 'bencgreenberg',
+            repo: 'github-action-gpt-language-check'
+          });
+          const asset = response.data.assets.find(asset => asset.name === 'github-action-gpt-language-check');
+          if (!asset) {
+            throw new Error('Binary not found in the latest release');
+          }
+          return { url: asset.browser_download_url };
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+    - name: Download pre-built Rust script from remote repository
+      run: |
+        wget "${{ steps.get_latest_release.outputs.url }}" -O github-action-gpt-language-check
+        chmod +x github-action-gpt-language-check
+
+    - name: Run Rust script for each markdown file
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: |
+        suggestions=""
+        for file in $(find . -type f -iname "*.md"); do
+          echo "Reviewing: $file"
+          suggestion=$(./github-action-gpt-language-check "$file")
+          if [[ ! -z "$suggestion" ]]; then
+            suggestions+="- $file: $suggestion\n"
+            echo "Suggestion found"
+            echo "SUGGESTION_FOUND=true" >> $GITHUB_ENV
+          fi
+        done
+        echo "SUGGESTIONS=$suggestions" >> $GITHUB_ENV
+
+
+
+    - name: Add a comment to the pull request
+      if: ${{ env.SUGGESTION_FOUND == 'true' }}
+      uses: actions/github-script@v5
+      with:
+        script: |
+          const suggestions = `Suggested changes: ${process.env.SUGGESTIONS}`
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: suggestions
+          });
+
