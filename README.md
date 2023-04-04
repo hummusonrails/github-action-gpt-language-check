@@ -1,6 +1,6 @@
 # GitHub Action: GPT Language Check
 
-This GitHub action reviews markdown files in your pull requests for potentially discriminatory language, including but not limited to ableism, ageism, racism, antisemitism, Islamophobia, and similar issues. It uses the OpenAI GPT-4 language model to detect discriminatory language and provides suggestions for alternative language.
+This GitHub action reviews markdown files in your pull requests for potentially discriminatory language, including but not limited to ableism, ageism, racism, antisemitism, Islamophobia, and similar issues. It uses the OpenAI GPT-3.5 language model to detect discriminatory language and provides suggestions for alternative language.
 
 ## Usage
 
