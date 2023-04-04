@@ -1,6 +1,9 @@
 name: 'Review Markdown for Discriminatory Language with ChatGPT'
 description: 'Reviews Markdown files in pull requests for potentially discriminatory language and provides suggestions for improvements'
 author: 'Ben Greenberg'
+branding:
+  icon: 'align-left'
+  color: 'green'
 inputs:
   openai_api_key:
     description: 'OpenAI API key for accessing the GPT model'
