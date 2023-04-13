@@ -16,7 +16,7 @@ jobs:
     - name: Download pre-built Rust script from remote repository
       run: |
         # Fetch the latest release information from the GitHub API
-        release_info=$(curl -s -H "Accept: application/vnd.github+json" https://api.github.com/repos/bencgreenberg/github-action-gpt-language-check/releases/latest)
+        release_info=$(curl -s -H "Accept: application/vnd.github+json" https://api.github.com/repos/hummusonrails/github-action-gpt-language-check/releases/latest)
         
         # Extract the binary's download URL using 'jq' 
         binary_url=$(echo $release_info | jq -r '.assets[] | select(.name == "github-action-gpt-language-check") | .browser_download_url')

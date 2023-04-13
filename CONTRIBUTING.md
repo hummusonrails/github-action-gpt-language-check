@@ -8,7 +8,7 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
 
 ## Reporting Issues
 
-If you find a bug, have a question, or want to request a new feature, please [create an issue](https://github.com/bencgreenberg/github-action-gpt-language-check/issues/new) in the project repository. When reporting a bug, please include:
+If you find a bug, have a question, or want to request a new feature, please [create an issue](https://github.com/hummusonrails/github-action-gpt-language-check/issues/new) in the project repository. When reporting a bug, please include:
 
 - A clear and descriptive title
 - Steps to reproduce the issue
@@ -26,7 +26,7 @@ To contribute to this project, please follow these steps:
 4. Ensure your changes do not break any tests or introduce new issues by running tests and linters.
 5. Commit your changes, using clear and descriptive commit messages.
 6. Push your changes to your fork on GitHub.
-7. Create a [pull request](https://github.com/bencgreenberg/github-action-gpt-language-check/compare) to the main repository.
+7. Create a [pull request](https://github.com/hummusonrails/github-action-gpt-language-check/compare) to the main repository.
 
 Please keep your pull request focused on a single issue or feature. If you have multiple unrelated changes, create separate pull requests for each.
 
@@ -51,6 +51,6 @@ When you make changes that affect how the project is used or configured, please 
 
 ## Getting Help
 
-If you have questions or need help with contributing, please [create an issue](https://github.com/bencgreenberg/github-action-gpt-language-check/issues/new) or reach out to the project maintainers through the preferred communication channels.
+If you have questions or need help with contributing, please [create an issue](https://github.com/hummusonrails/github-action-gpt-language-check/issues/new) or reach out to the project maintainers through the preferred communication channels.
 
 Thank you for contributing to ChatGPT Language Check GitHub Action!
